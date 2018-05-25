@@ -1,10 +1,13 @@
 [package]
 name = "onthehour"
-version = "0.1.0"
+version = "3.0.0"
 authors = ["Richard Dallaway <richard@dallaway.com>"]
 
 [dependencies]
 chrono = "0.4"
 chrono-tz = "0.4"
-"tweetust" = "0.8.0"
+tweetust = "0.8.0"
+envy = "0.3.2"
+serde = "1.0"
+serde_derive = "1.0"
 
