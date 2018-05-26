@@ -6,11 +6,13 @@ extern crate tweetust;
 extern crate serde_derive;
 extern crate envy;
 
-use chrono::{DateTime, Utc, Timelike, TimeZone};
-use chrono_tz::Tz;
+extern crate openssl_probe;
+
+use chrono::{DateTime, TimeZone, Timelike, Utc};
 use chrono_tz::Europe::London;
-use tweetust::*;
+use chrono_tz::Tz;
 use tweetust::models::*;
+use tweetust::*;
 
 #[derive(Deserialize, Debug)]
 struct TwitterCredentials {
@@ -21,6 +23,7 @@ struct TwitterCredentials {
 }
 
 fn main() {
+    openssl_probe::init_ssl_cert_env_vars();
     let now: DateTime<Utc> = Utc::now();
     let msg = tweet_for(now);
 
@@ -37,9 +40,17 @@ fn read_credentials() -> Result<TwitterCredentials, envy::Error> {
     envy::from_env::<TwitterCredentials>()
 }
 
-fn send_tweet(creds: TwitterCredentials, msg: &str) -> Result<TwitterResponse<Tweet>, TwitterError> {
+fn send_tweet(
+    creds: TwitterCredentials,
+    msg: &str,
+) -> Result<TwitterResponse<Tweet>, TwitterError> {
     let handler = DefaultHttpHandler::with_https_connector().unwrap();
-    let auth = OAuthAuthenticator::new(creds.consumer_key, creds.consumer_secret, creds.access_token, creds.access_secret);
+    let auth = OAuthAuthenticator::new(
+        creds.consumer_key,
+        creds.consumer_secret,
+        creds.access_token,
+        creds.access_secret,
+    );
 
     TwitterClient::new(auth, handler)
         .statuses()

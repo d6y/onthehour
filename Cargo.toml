@@ -10,4 +10,4 @@ tweetust = "0.8.0"
 envy = "0.3.2"
 serde = "1.0"
 serde_derive = "1.0"
-
+openssl-probe = "0.1.2"
