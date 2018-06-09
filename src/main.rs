@@ -22,6 +22,12 @@ struct TwitterCredentials {
     access_secret: String,
 }
 
+#[derive(Debug)]
+enum SendTweetError {
+    InvalidHTTPSHandler,
+    TwitterError(TwitterError)
+}
+
 fn main() {
     openssl_probe::init_ssl_cert_env_vars();
     let now: DateTime<Utc> = Utc::now();
@@ -44,18 +50,23 @@ fn send_tweet(
     creds: TwitterCredentials,
     msg: &str,
 ) -> Result<TwitterResponse<Tweet>, TwitterError> {
-    let handler = DefaultHttpHandler::with_https_connector().unwrap();
-    let auth = OAuthAuthenticator::new(
-        creds.consumer_key,
-        creds.consumer_secret,
-        creds.access_token,
-        creds.access_secret,
-    );
+    DefaultHttpHandler::with_https_connector()
+        .map_err(|_| SendTweetError::InvalidHTTPSHandler)
+        .and_then(|handler| {
+            let auth = OAuthAuthenticator::new(
+                creds.consumer_key,
+                creds.consumer_secret,
+                creds.access_token,
+                creds.access_secret,
+            );
 
-    TwitterClient::new(auth, handler)
-        .statuses()
-        .update(msg)
-        .execute()
+            TwitterClient::new(auth, handler)
+                .statuses()
+                .update(msg)
+                .execute()
+                .map_err(|error| SendTweetError::TwitterError(error))
+                .map(|value| value)
+        })
 }
 
 fn tweet_for(when: DateTime<Utc>) -> String {
