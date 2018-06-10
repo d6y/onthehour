@@ -49,7 +49,7 @@ fn read_credentials() -> Result<TwitterCredentials, envy::Error> {
 fn send_tweet(
     creds: TwitterCredentials,
     msg: &str,
-) -> Result<TwitterResponse<Tweet>, TwitterError> {
+) -> Result<TwitterResponse<Tweet>, SendTweetError> {
     DefaultHttpHandler::with_https_connector()
         .map_err(|_| SendTweetError::InvalidHTTPSHandler)
         .and_then(|handler| {
