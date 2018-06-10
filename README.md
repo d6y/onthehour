@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/d6y/onthehour.svg?branch=master)](https://travis-ci.com/d6y/onthehour)
+
 # A bot that Tweets every hour
 
 ## Using a Mac to build the Linux binary
