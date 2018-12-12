@@ -1,16 +1,14 @@
 extern crate chrono;
 extern crate chrono_tz;
-extern crate tweetust;
-
-#[macro_use]
-extern crate serde_derive;
 extern crate envy;
-
 extern crate openssl_probe;
+extern crate serde_derive;
+extern crate tweetust;
 
 use chrono::{DateTime, TimeZone, Timelike, Utc};
 use chrono_tz::Europe::London;
 use chrono_tz::Tz;
+use serde_derive::Deserialize;
 use tweetust::models::*;
 use tweetust::*;
 
@@ -25,7 +23,7 @@ struct TwitterCredentials {
 #[derive(Debug)]
 enum SendTweetError {
     InvalidHTTPSHandler,
-    TwitterError(TwitterError)
+    TwitterError(TwitterError),
 }
 
 fn main() {
