@@ -62,18 +62,17 @@ fn send_tweet(
                 .statuses()
                 .update(msg)
                 .execute()
-                .map_err(|error| SendTweetError::TwitterError(error))
+                .map_err(SendTweetError::TwitterError)
                 .map(|value| value)
         })
 }
 
 fn tweet_for(when: DateTime<Utc>) -> String {
     let uk: DateTime<Tz> = London.from_utc_datetime(&when.naive_utc());
-    let tweet_message = match uk.time().hour() {
+    match uk.time().hour() {
         0 => "It's midnight".to_string(),
         _ => uk.format("It's %-l o'clock (%H:00)").to_string(),
-    };
-    tweet_message
+    }
 }
 
 #[cfg(test)]
