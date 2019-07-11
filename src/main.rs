@@ -35,7 +35,7 @@ fn main() {
         Err(e) => eprintln!("Would have sent {}, but won't because {}", msg, e),
         Ok(creds) => {
             let result = send_tweet(creds, &msg);
-            println!("{:?}", result);
+            println!("{:#?}", result);
         }
     }
 }
