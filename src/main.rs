@@ -34,8 +34,15 @@ fn main() {
     match read_credentials() {
         Err(e) => eprintln!("Would have sent {}, but won't because {}", msg, e),
         Ok(creds) => {
-            let result = send_tweet(creds, &msg);
-            println!("{:#?}", result);
+            let result = send_tweet(&creds, &msg);
+            match result {
+                Ok(_) => {}
+                Err(err) => {
+                    eprintln!("Failed to send '{}': {:?}", msg, err);
+                    let result = send_tweet(&creds, &msg);
+                    eprintln!("Retried: {:#?}", result);
+                }
+            }
         }
     }
 }
@@ -45,17 +52,17 @@ fn read_credentials() -> Result<TwitterCredentials, envy::Error> {
 }
 
 fn send_tweet(
-    creds: TwitterCredentials,
+    creds: &TwitterCredentials,
     msg: &str,
 ) -> Result<TwitterResponse<Tweet>, SendTweetError> {
     DefaultHttpHandler::with_https_connector()
         .map_err(|_| SendTweetError::InvalidHTTPSHandler)
         .and_then(|handler| {
             let auth = OAuthAuthenticator::new(
-                creds.consumer_key,
-                creds.consumer_secret,
-                creds.access_token,
-                creds.access_secret,
+                &creds.consumer_key,
+                &creds.consumer_secret,
+                &creds.access_token,
+                &creds.access_secret,
             );
 
             TwitterClient::new(auth, handler)
