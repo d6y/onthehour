@@ -70,7 +70,6 @@ fn send_tweet(
                 .update(msg)
                 .execute()
                 .map_err(SendTweetError::TwitterError)
-                .map(|value| value)
         })
 }
 
