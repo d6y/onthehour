@@ -1,19 +1,15 @@
-[![Build Status](https://travis-ci.com/d6y/onthehour.svg?branch=master)](https://travis-ci.com/d6y/onthehour)
-
 # A bot that Tweets every hour
 
-## Using a Mac to build the Linux binary
+## Running
+
+When you run `onthehour` do so with the following environment variables:
 
 ```
-docker pull clux/muslrust
-docker run -v $PWD:/volume -t clux/muslrust cargo build --release
+cargo build --release
+CONSUMER_KEY=??? CONSUMER_SECRET=??? ACCESS_TOKEN=??? ACCESS_SECRET=??? onthehour
 ```
 
-The binary will be:
-
-```
-target/x86_64-unknown-linux-musl/release/onthehour
-```
+Or: use the `Dockerfile` to build a docker image.
 
 ## How to create Twitter credentials
 
@@ -29,8 +25,3 @@ Scroll down and press "Create my access token", and then note:
 - Access Token
 - Access Token Secret
 
-When you run `onthehour` do so with the following environment variables:
-
-```
-CONSUMER_KEY=??? CONSUMER_SECRET=??? ACCESS_TOKEN=??? ACCESS_SECRET=??? onthehour
-```

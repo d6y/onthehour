@@ -1,16 +1,9 @@
-extern crate chrono;
-extern crate chrono_tz;
-extern crate envy;
-extern crate openssl_probe;
-extern crate serde_derive;
-extern crate tweetust;
-
 use chrono::{DateTime, Duration, TimeZone, Timelike, Utc};
 use chrono_tz::Europe::London;
 use chrono_tz::Tz;
 use serde_derive::Deserialize;
-use tweetust::models::*;
-use tweetust::*;
+use twitter_v2::authorization::Oauth1aToken;
+use twitter_v2::{ApiResponse, Error, Tweet, TwitterApi};
 
 #[derive(Deserialize, Debug)]
 struct TwitterCredentials {
@@ -20,26 +13,20 @@ struct TwitterCredentials {
     access_secret: String,
 }
 
-#[derive(Debug)]
-enum SendTweetError {
-    InvalidHTTPSHandler,
-    TwitterError(TwitterError),
-}
-
-fn main() {
-    openssl_probe::init_ssl_cert_env_vars();
+#[tokio::main]
+async fn main() {
     let now: DateTime<Utc> = Utc::now();
     let msg = tweet_for(now);
 
     match read_credentials() {
         Err(e) => eprintln!("Would have sent {}, but won't because {}", msg, e),
         Ok(creds) => {
-            let result = send_tweet(&creds, &msg);
+            let result = send_tweet(&creds, &msg).await;
             match result {
                 Ok(_) => {}
                 Err(err) => {
                     eprintln!("Failed to send '{}': {:?}", msg, err);
-                    let result = send_tweet(&creds, &msg);
+                    let result = send_tweet(&creds, &msg).await;
                     eprintln!("Retried: {:#?}", result);
                 }
             }
@@ -51,26 +38,22 @@ fn read_credentials() -> Result<TwitterCredentials, envy::Error> {
     envy::from_env::<TwitterCredentials>()
 }
 
-fn send_tweet(
+async fn send_tweet(
     creds: &TwitterCredentials,
     msg: &str,
-) -> Result<TwitterResponse<Tweet>, SendTweetError> {
-    DefaultHttpHandler::with_https_connector()
-        .map_err(|_| SendTweetError::InvalidHTTPSHandler)
-        .and_then(|handler| {
-            let auth = OAuthAuthenticator::new(
-                &creds.consumer_key,
-                &creds.consumer_secret,
-                &creds.access_token,
-                &creds.access_secret,
-            );
+) -> Result<ApiResponse<Oauth1aToken, Tweet, ()>, Error> {
+    let auth = Oauth1aToken::new(
+        &creds.consumer_key,
+        &creds.consumer_secret,
+        &creds.access_token,
+        &creds.access_secret,
+    );
 
-            TwitterClient::new(auth, handler)
-                .statuses()
-                .update(msg)
-                .execute()
-                .map_err(SendTweetError::TwitterError)
-        })
+    TwitterApi::new(auth)
+        .post_tweet()
+        .text(msg.to_owned())
+        .send()
+        .await
 }
 
 fn tweet_for(when: DateTime<Utc>) -> String {
