@@ -24,6 +24,9 @@ async fn main() {
             let result = send_tweet(&creds, &msg).await;
             match result {
                 Ok(_) => {}
+                Err(Error::Api(api_err)) if api_err.status.is_client_error() => {
+                    eprint!("Bad request: {:?}", api_err)
+                },
                 Err(err) => {
                     eprintln!("Failed to send '{}': {:?}", msg, err);
                     let result = send_tweet(&creds, &msg).await;
