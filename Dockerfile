@@ -5,4 +5,5 @@ RUN cargo install --path .
 
 FROM debian:buster-slim as rt
 COPY --from=cargo /usr/local/cargo/bin/onthehour /usr/local/bin/onthehour
+ENV TZ="Europe/London"
 CMD ["onthehour"]
